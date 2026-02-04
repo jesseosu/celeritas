@@ -178,6 +178,10 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
       <Project>{16DB25DF-2F4A-3464-9492-F919F916B954}</Project>
       <Name>celeritas_common</Name>
     </ProjectReference>
+    <ProjectReference Include="C:\Users\roast\Documents\GitHub\celeritas\build\tests\celeritas_tests.vcxproj">
+      <Project>{4F54CAFA-5EDD-3189-AFE4-2862A0BA2E0A}</Project>
+      <Name>celeritas_tests</Name>
+    </ProjectReference>
     <ProjectReference Include="C:\Users\roast\Documents\GitHub\celeritas\build\exchange.vcxproj">
       <Project>{76CD6BD9-FEFC-3F7C-90D0-2155FCD88318}</Project>
       <Name>exchange</Name>
