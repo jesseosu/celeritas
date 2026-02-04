@@ -5,11 +5,11 @@
 namespace celeritas {
 
 struct Trade {
-  OrderId buy_id;
-  OrderId sell_id;
-  int price;
-  int quantity;
-  std::uint64_t timestamp;
+  OrderId buy_id{};
+  OrderId sell_id{};
+  int price{0};
+  int quantity{0};
+  std::uint64_t timestamp{0};
 };
 
 }
