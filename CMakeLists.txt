@@ -14,6 +14,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CompilerWarnings)
 
+# -------------------------
+# Common library
+# -------------------------
 add_library(celeritas_common
   src/common/Time.cpp
   src/common/Log.cpp
@@ -21,11 +24,27 @@ add_library(celeritas_common
 target_include_directories(celeritas_common PUBLIC include)
 set_project_warnings(celeritas_common)
 
+# -------------------------
+# Exchange engine library (Phase 1)
+# -------------------------
+add_library(celeritas_exchange
+  src/exchange/OrderBook.cpp
+)
+target_include_directories(celeritas_exchange PUBLIC include)
+target_link_libraries(celeritas_exchange PUBLIC celeritas_common)
+set_project_warnings(celeritas_exchange)
+
+# -------------------------
+# CLI app
+# -------------------------
 add_executable(exchange
   src/exchange/main.cpp
 )
-target_link_libraries(exchange PRIVATE celeritas_common)
+target_link_libraries(exchange PRIVATE celeritas_exchange)
 set_project_warnings(exchange)
 
+# -------------------------
+# Tests
+# -------------------------
 enable_testing()
 add_subdirectory(tests)
