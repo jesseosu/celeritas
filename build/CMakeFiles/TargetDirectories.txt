@@ -1,7 +1,0 @@
-C:/Users/roast/Documents/GitHub/celeritas/build/CMakeFiles/celeritas_common.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/CMakeFiles/exchange.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/CMakeFiles/RUN_TESTS.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/CMakeFiles/ZERO_CHECK.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/tests/CMakeFiles/celeritas_tests.dir
-C:/Users/roast/Documents/GitHub/celeritas/build/tests/CMakeFiles/RUN_TESTS.dir

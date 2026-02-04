@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Users/roast/Documents/GitHub/celeritas/build/cmake_install.cmake",
-		"C:/Users/roast/Documents/GitHub/celeritas/build/tests/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
