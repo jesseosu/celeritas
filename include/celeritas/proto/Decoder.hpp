@@ -32,4 +32,4 @@ std::uint16_t expected_length(MsgType t);
 // - If invalid: err is set (and bytes_consumed == 0)
 DecodeResult decode_one(const std::uint8_t* data, std::size_t len);
 
-} // namespace celeritas::proto
+}

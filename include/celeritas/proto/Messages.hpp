@@ -121,4 +121,4 @@ inline MsgHeader make_header(MsgType t, std::uint16_t total_len,
   return h;
 }
 
-} // namespace celeritas::proto
+}
