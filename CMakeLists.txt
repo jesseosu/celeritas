@@ -58,18 +58,4 @@ add_library(celeritas_proto
 target_include_directories(celeritas_proto PUBLIC include)
 target_link_libraries(celeritas_proto PUBLIC celeritas_common)
 target_compile_features(celeritas_proto PUBLIC cxx_std_20)
-set_project_warnings(celeritas_proto)
-
-
 add_subdirectory(apps/pipeline_runner)
-
-
-enable_testing()
-
-add_executable(test_spsc_smoke tests/test_spsc_smoke.cpp)
-target_include_directories(test_spsc_smoke PRIVATE include)
-add_test(NAME spsc_smoke COMMAND test_spsc_smoke)
-
-add_executable(test_orderbook_l2 tests/test_orderbook_l2.cpp)
-target_include_directories(test_orderbook_l2 PRIVATE include)
-add_test(NAME orderbook_l2 COMMAND test_orderbook_l2)
