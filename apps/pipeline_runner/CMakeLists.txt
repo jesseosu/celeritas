@@ -1,6 +1,3 @@
-add_executable(pipeline_runner
-  main.cpp
-  ../../src/metrics/latency.cpp
-)
-target_include_directories(pipeline_runner PRIVATE ../../include)
-target_link_libraries(pipeline_runner PRIVATE celeritas_common)
+add_executable(pipeline_runner main.cpp)
+target_include_directories(pipeline_runner PRIVATE ${PROJECT_SOURCE_DIR}/include)
+target_link_libraries(pipeline_runner PRIVATE llp_engine celeritas_exchange celeritas_common)
