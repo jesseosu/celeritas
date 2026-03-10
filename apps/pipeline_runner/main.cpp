@@ -135,7 +135,9 @@ int main(int argc, char** argv) {
         llp::time::cpu_relax();
       }
 
-      processed.fetch_add(1, std::memory_order_relaxed);
+      if (warmup_done.load(std::memory_order_acquire)) {
+    	processed.fetch_add(1, std::memory_order_relaxed);
+	}
     }
 
     ExecReport end{};
@@ -202,7 +204,7 @@ int main(int argc, char** argv) {
   auto s = lat.summarize();
 
   std::cout
-      << "processed=" << processed.load() << "\n"
+      << "processed=" << (reports.load() - warmup) << "\n"
       << "reports=" << reports.load() << "\n"
       << "book_checksum=" << book.checksum() << "\n"
       << (use_tsc ? "latency_cycles: p50=" : "latency_ns: p50=") << s.p50

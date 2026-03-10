@@ -20,7 +20,7 @@ inline bool pin_thread_to_cpu(uint32_t cpu_index) noexcept {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(cpu_index, &cpuset);
-    eturn pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) == 0;
+    return pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpuset) == 0;
 #endif
 }
 
