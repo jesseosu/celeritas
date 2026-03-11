@@ -25,14 +25,17 @@ EngineStats MatchingEngine::run() {
 
         if (req.type == RequestType::End) break;
 
-        const uint64_t t_eng = llp::time::now_ns();
-        if (req.t0_ns != 0) lat_.record(t_eng - req.t0_ns);
+        // Measure only engine processing time, not queue wait time
+        const uint64_t t_start = llp::time::now_ns();
 
         if (req.type == RequestType::NewOrder) {
             handle_new_order(req);
         } else if (req.type == RequestType::Cancel) {
             handle_cancel(req);
         }
+
+        const uint64_t t_end = llp::time::now_ns();
+        lat_.record(t_end - t_start);
 
         stats_.processed++;
     }
@@ -144,4 +147,4 @@ void MatchingEngine::maybe_publish_md(uint32_t symbol,
     stats_.md_updates++;
 }
 
-} // namespace llp::engine
+}
