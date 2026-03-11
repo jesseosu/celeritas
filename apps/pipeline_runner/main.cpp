@@ -35,14 +35,9 @@ int main(int argc, char** argv) {
   using llp::exchange::ExecReport;
   using llp::exchange::ExecType;
 
-  const uint64_t warmup   = parse_u64_arg(argc, argv, "--warmup", 100'000);
-  const uint64_t events   = parse_u64_arg(argc, argv, "--events", 1'000'000);
-  const bool     use_tsc  = has_flag(argc, argv, "--tsc");
-
-  constexpr uint32_t PRODUCER_CORE = 0;
-  constexpr uint32_t ENGINE_CORE   = 1;
-  constexpr uint32_t EXEC_PUB_CORE = 2;
-  constexpr uint32_t MD_PUB_CORE   = 3;
+  const uint64_t warmup  = parse_u64_arg(argc, argv, "--warmup", 100'000);
+  const uint64_t events  = parse_u64_arg(argc, argv, "--events", 1'000'000);
+  const bool     use_tsc = has_flag(argc, argv, "--tsc");
 
   std::cout << "pipeline_runner starting...\n"
             << "warmup="        << warmup << "\n"
@@ -67,7 +62,7 @@ int main(int argc, char** argv) {
 
   // ── Exec Publisher Thread ──────────────────────────────────────────────
   std::thread exec_publisher([&] {
-    llp::sys::pin_thread_to_cpu(EXEC_PUB_CORE);
+    // llp::sys::pin_thread_to_cpu(EXEC_PUB_CORE); // disabled: let OS schedule
     llp::sys::set_high_priority();
 
     ExecReport r{};
@@ -80,12 +75,10 @@ int main(int argc, char** argv) {
 
   // ── MD Publisher Thread ────────────────────────────────────────────────
   std::thread md_publisher([&] {
-    llp::sys::pin_thread_to_cpu(MD_PUB_CORE);
+    // llp::sys::pin_thread_to_cpu(MD_PUB_CORE); // disabled: let OS schedule
     llp::sys::set_high_priority();
 
     MarketDataEvent md{};
-    // MD publisher runs until exec publisher signals done
-    // We use a sentinel md event with symbol == UINT32_MAX
     while (true) {
       if (!md_q.pop(md)) { llp::time::cpu_relax(); continue; }
       if (md.symbol == UINT32_MAX) break;
@@ -95,14 +88,13 @@ int main(int argc, char** argv) {
 
   // ── Matching Engine Thread ─────────────────────────────────────────────
   std::thread engine_thread([&] {
-    llp::sys::pin_thread_to_cpu(ENGINE_CORE);
+    // llp::sys::pin_thread_to_cpu(ENGINE_CORE); // disabled: let OS schedule
     llp::sys::set_high_priority();
 
     started.store(true, std::memory_order_release);
 
     MatchingEngine engine(in_q, exec_q, md_q, lat);
     auto stats = engine.run();
-
     (void)stats;
 
     // Signal exec publisher to stop
@@ -118,7 +110,7 @@ int main(int argc, char** argv) {
 
   // ── Producer Thread ────────────────────────────────────────────────────
   std::thread producer([&] {
-    llp::sys::pin_thread_to_cpu(PRODUCER_CORE);
+    // llp::sys::pin_thread_to_cpu(PRODUCER_CORE); // disabled: let OS schedule
     llp::sys::set_high_priority();
 
     while (!started.load(std::memory_order_acquire))
@@ -142,9 +134,7 @@ int main(int argc, char** argv) {
 
     warmup_done.store(true, std::memory_order_release);
 
-    // Measured phase
-    // Mix of new orders and cancels to exercise full lifecycle
-    // Every 10th event is a cancel of a recent order
+    // Measured phase — mix of new orders and cancels
     uint64_t last_id = next_id - 1;
 
     for (uint64_t i = 0; i < events; i++) {
@@ -153,7 +143,7 @@ int main(int argc, char** argv) {
       if (i % 10 == 9 && last_id >= 1) {
         // Cancel a recent resting order
         req.type     = RequestType::Cancel;
-        req.order_id = last_id - (last_id % 2); // cancel an even (buy) order
+        req.order_id = last_id - (last_id % 2);
         req.symbol   = 1;
         req.t0_ns    = use_tsc ? llp::time::rdtsc() : llp::time::now_ns();
       } else {
@@ -167,7 +157,11 @@ int main(int argc, char** argv) {
         last_id      = req.order_id;
       }
 
-      while (!in_q.push(req)) llp::time::cpu_relax();
+      // Backpressure: yield when queue is full so engine can catch up
+      while (!in_q.push(req)) {
+        llp::time::cpu_relax();
+        std::this_thread::yield();
+      }
     }
 
     // Send End sentinel
@@ -184,9 +178,9 @@ int main(int argc, char** argv) {
   auto s = lat.summarize();
 
   std::cout
-    << "processed="   << events << "\n"
+    << "processed="    << events << "\n"
     << "exec_reports=" << exec_reports.load() << "\n"
-    << "md_updates="  << md_updates.load() << "\n"
+    << "md_updates="   << md_updates.load() << "\n"
     << (use_tsc ? "latency_cycles: p50=" : "latency_ns: p50=") << s.p50
     << " p95=" << s.p95
     << " p99=" << s.p99
